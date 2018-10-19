@@ -4,6 +4,8 @@
 #include	<math.h>
 #include	<iostream>
 #include	<fstream>
+#include    "sim_run.h"
+using namespace std;
 
 void next_func(FILE* fptr) {
     
@@ -48,9 +50,13 @@ int load_func(FILE* fptr, double* outptr) {
 	
 }
 
-
 int main()
 {
+
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::default_random_engine generator (seed);
+    std::normal_distribution<double> distribution (0.0,1.0);
+
 	FILE*		file_ptr;
 	
 	char		str_input[5];
@@ -68,19 +74,60 @@ int main()
 	
 	next_func(file_ptr);
 	
-	while (!feof(file_ptr)){
-		count = count+1;
-		flag = load_func(file_ptr, result);
-		if (flag){
-			printf("Line:%d, %.2f, %.2f, %.2f\n", count, result[0], result[1], result[2]);
-			
-		}
+	//while (!feof(file_ptr)){
+		//count = count+1;
+		//flag = load_func(file_ptr, result);
+		//if (flag){
+		//	printf("Line:%d, %.2f, %.2f, %.2f\n", count, result[0], result[1], result[2]);
+		//	
+		//}
 		
-	}
-	
+	//}
+
 	fclose(file_ptr);
-	scanf("%d",&end);
-	
+	//scanf("%d",&end);
+
+    int N = 4000;
+    double** r = new double* [N];
+    double** v = new double* [N];
+    double** f = new double* [N];
+    int ntimestep = 0;
+
+
+    for(int i = 0; i < N; i++) {
+        r[i] = new double[3];
+        v[i] = new double[3];
+        f[i] = new double[3];
+    }
+
+    for (int i = 0; i < N; i++) {
+        r[i][0] = result[0];
+        r[i][1] = result[1];
+        r[i][2] = result[2];
+    }
+
+    for(int i = 0; i < N; i++) {
+        for(int j = 0; j < 3; j++) {
+            v[i][j] = 0;
+            f[i][j] = 0;
+        }
+    }
+
+    double rand_num = distribution(generator);
+    compute_force(r, v, f, rand_num, N);
+
+    //memory release
+    for(int i = 0; i < N; i++) {
+        delete(r[i]);
+        delete(v[i]);
+        delete(f[i]);
+    }
+
+    delete(r);
+    delete(v);
+    delete(f);
+    cout << "position is read, f is computed" << endl;
+ 
 }
 
 
