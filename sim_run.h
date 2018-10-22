@@ -12,6 +12,6 @@ const double rc=1.0;
 #include <random>
 
 
-void run();
+void clear_force(double** f, int N);
 void compute_force(double** r, double** v, double** f, double rand_num, int N);
 #endif 

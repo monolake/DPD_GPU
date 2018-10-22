@@ -114,7 +114,37 @@ int main()
     }
 
     double rand_num = distribution(generator);
+    //init force compute
     compute_force(r, v, f, rand_num, N);
+    int ntimestep = 1000;
+    for (int i = 0; i < ntimestep; i++) {
+
+        //half integration
+        for(int j = 0; j < N; j++) {
+            v[j][0] += 0.5 * f[j][0] / m * dt;
+            v[j][1] += 0.5 * f[j][1] / m * dt;
+            v[j][2] += 0.5 * f[j][2] / m * dt;
+
+            r[j][0] += v[j][0] * dt;
+            r[j][1] += v[j][1] * dt;
+            r[j][2] += v[j][2] * dt;
+        }
+ 
+        vector<vector<int>> cell_list;
+        buildNeighborList(neighborlist, r);
+        //force computation
+        //update f
+        clear_force(f);
+        computeForce(r, v, f, distribution(generator), cell_list);
+
+        //full integration
+        for(int j = 0; j < N; j++) {
+            v[j][0] += 0.5 * f[j][0] / m * dt;
+            v[j][1] += 0.5 * f[j][1] / m * dt;
+            v[j][2] += 0.5 * f[j][2] / m * dt;
+        }
+ 
+    }
 
     //memory release
     for(int i = 0; i < N; i++) {

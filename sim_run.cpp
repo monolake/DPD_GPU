@@ -1,6 +1,11 @@
 #include "sim_run.h"
 
-void run() {
+void clear_force(double **f, int N) {
+    for (int i = 0; i < N; i++) {
+        f[i][0] = 0;
+        f[i][1] = 0;
+        f[i][2] = 0;    
+    }
 }
 
 void compute_force(double** r, double** v, double** f, double rand_num, int N) {
