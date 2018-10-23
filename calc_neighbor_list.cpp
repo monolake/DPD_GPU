@@ -1,10 +1,4 @@
-#include	<stdio.h>
-#include 	<stdlib.h>
-#include 	<string.h>
-#include	<math.h>
-#include	<iostream>
-#include	<fstream>
-
+#include "calc_neighbor_list.h"
 
 /***********************************************************************************************/
 
@@ -26,17 +20,17 @@
 /***********************************************************************************************/
 
 
-const int		CONST_MAX_RAND = 1000;
-
-
-typedef struct OUTPUT_struct{
-	int				cell_num;
-	int				col_num; // return max #partices in a cell
-	int*			cell_partc_num_res; // return num of particles in each cell
-	int**			cell_partc_list_res; // return cell list
-	
-	int**			cell_id2loc;
-}OUTPUT_struct;
+//const int		CONST_MAX_RAND = 1000;
+//
+//
+//typedef struct OUTPUT_struct{
+//	int				cell_num;
+//	int				col_num; // return max #partices in a cell
+//	int*			cell_partc_num_res; // return num of particles in each cell
+//	int**			cell_partc_list_res; // return cell list
+//	
+//	int**			cell_id2loc;
+//}OUTPUT_struct;
 
 
 // function to calculate cell list 
@@ -180,65 +174,65 @@ void func_print_output_info(OUTPUT_struct*	output_info){
 }
 
 
-int main(){
-	
-	int		loop;
-	unsigned int seed;
-	
-	//input_cube
-	double	len_cell;
-	double	len_x, len_y, len_z;
-	
-	//input_partc
-	int		partc_num;
-	double**	partc_pos;
-	
-	int		end_flag;
-	
-	//output
-	OUTPUT_struct*	output_info;
-	
-	seed = 10;
-	srand(seed);
-	
-	//INPUT information:
-	len_cell = 1.0;
-	len_x = 2.0;
-	len_y = 2.0;
-	len_z = 5.0;
-	
-	partc_num = 10;
-	partc_pos = (double**)malloc(partc_num*sizeof(double*));
-	for(loop=0; loop<partc_num; loop++){
-		partc_pos[loop] = (double*)malloc(3*sizeof(double));
-		partc_pos[loop][0] = (double)(rand()%CONST_MAX_RAND)/(CONST_MAX_RAND-1)*len_x;
-		partc_pos[loop][1] = (double)(rand()%CONST_MAX_RAND)/(CONST_MAX_RAND-1)*len_y;
-		partc_pos[loop][2] = (double)(rand()%CONST_MAX_RAND)/(CONST_MAX_RAND-1)*len_z;
-		
-	}
-	
-	
-	
-	output_info =  func_partc_incell_stat(partc_pos, partc_num, len_cell, len_x, len_y, len_z);
-	
-	
-	//PRINT basic information
-	//if (1){
-		
-		
-	//}
-	
-	//PRINT output information
-	if (1){
-		func_print_output_info(output_info);
-	}
-	
-	scanf("%d",&end_flag);
-	
-	
-	
-}
-
+//int main(){
+//	
+//	int		loop;
+//	unsigned int seed;
+//	
+//	//input_cube
+//	double	len_cell;
+//	double	len_x, len_y, len_z;
+//	
+//	//input_partc
+//	int		partc_num;
+//	double**	partc_pos;
+//	
+//	int		end_flag;
+//	
+//	//output
+//	OUTPUT_struct*	output_info;
+//	
+//	seed = 10;
+//	srand(seed);
+//	
+//	//INPUT information:
+//	len_cell = 1.0;
+//	len_x = 2.0;
+//	len_y = 2.0;
+//	len_z = 5.0;
+//	
+//	partc_num = 10;
+//	partc_pos = (double**)malloc(partc_num*sizeof(double*));
+//	for(loop=0; loop<partc_num; loop++){
+//		partc_pos[loop] = (double*)malloc(3*sizeof(double));
+//		partc_pos[loop][0] = (double)(rand()%CONST_MAX_RAND)/(CONST_MAX_RAND-1)*len_x;
+//		partc_pos[loop][1] = (double)(rand()%CONST_MAX_RAND)/(CONST_MAX_RAND-1)*len_y;
+//		partc_pos[loop][2] = (double)(rand()%CONST_MAX_RAND)/(CONST_MAX_RAND-1)*len_z;
+//		
+//	}
+//	
+//	
+//	
+//	output_info =  func_partc_incell_stat(partc_pos, partc_num, len_cell, len_x, len_y, len_z);
+//	
+//	
+//	//PRINT basic information
+//	//if (1){
+//		
+//		
+//	//}
+//	
+//	//PRINT output information
+//	if (1){
+//		func_print_output_info(output_info);
+//	}
+//	
+//	scanf("%d",&end_flag);
+//	
+//	
+//	
+//}
+//
 
 
 
