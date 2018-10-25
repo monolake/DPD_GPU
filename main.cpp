@@ -170,7 +170,7 @@ int main()
 
     double rand_num = distribution(generator);
     //init force compute
-    compute_force(r, v, f, rand_num, N);
+    compute_force(r, v, f, rand_num, N, output_info);
     int ntimestep = 10;
     double m = 1.0;
     for (int i = 0; i < ntimestep; i++) {
@@ -192,7 +192,7 @@ int main()
         //update f
         clear_force(f, N);
         rand_num = distribution(generator);
-        compute_force(r, v, f, rand_num, N);
+        compute_force(r, v, f, rand_num, N, output_info);
 
         //full integration
         for(int j = 0; j < N; j++) {

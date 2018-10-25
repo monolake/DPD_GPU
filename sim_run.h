@@ -10,8 +10,10 @@ const double rc=1.0;
 
 #include <chrono>
 #include <random>
-
+#include "calc_neighbor_list.h"
+#include <iostream>
+using namespace std;
 
 void clear_force(double** f, int N);
-void compute_force(double** r, double** v, double** f, double rand_num, int N);
+void compute_force(double** r, double** v, double** f, double rand_num, int N, OUTPUT_struct* cell_list);
 #endif 
