@@ -65,8 +65,12 @@ int main()
 	int			count;
 	int			end;
 	int			flag;
+    double** partc_pos_res;
+    int pos_index;
+    int partc_num_def = 4000;
+    int i;
 	
-	//Main:
+	// read input position file
 	count = 0;
 	if((file_ptr = fopen("4000_new.txt","r")) == NULL){
 		printf("Cannt open the file!");
@@ -75,15 +79,30 @@ int main()
 	
 	next_func(file_ptr);
 	
-	//while (!feof(file_ptr)){
-		//count = count+1;
-		//flag = load_func(file_ptr, result);
-		//if (flag){
-		//	printf("Line:%d, %.2f, %.2f, %.2f\n", count, result[0], result[1], result[2]);
-		//	
-		//}
+
+    // allocate memory for partc_pos_res
+    partc_pos_res = (double**)malloc(partc_num_def*sizeof(double*));
+    for (i=0; i<partc_num_def; i++){
+        partc_pos_res[i] = (double*)malloc(3*sizeof(double));
+        
+    }
+
+    // fill in the particle positions into partc_pos_res
+	while (!feof(file_ptr)){
+		// count = count+1;
+		flag = load_func(file_ptr, result);
+		if (flag){
+
+			// printf("Line:%d, %.2f, %.2f, %.2f\n", count, result[0], result[1], result[2]);
+            for (pos_index=0; pos_index<3; pos_index++){
+                partc_pos_res[count][pos_index] = result[pos_index];
+            }
+			
+		}
+        count = count+1;
 		
-	//}
+	}
+
 
 	fclose(file_ptr);
 	//scanf("%d",&end);
@@ -109,24 +128,24 @@ int main()
     srand(seed);
     
     //INPUT information:
-    len_cell = 1.0;
-    len_x = 2.0;
-    len_y = 2.0;
-    len_z = 5.0;
+    len_cell = 2.0;
+    len_x = 10.0;
+    len_y = 10.0;
+    len_z = 10.0;
     
-    partc_num = 10;
-    partc_pos = (double**)malloc(partc_num*sizeof(double*));
-    for(loop=0; loop<partc_num; loop++){
-        partc_pos[loop] = (double*)malloc(3*sizeof(double));
-        partc_pos[loop][0] = (double)(rand()%CONST_MAX_RAND)/(CONST_MAX_RAND-1)*len_x;
-        partc_pos[loop][1] = (double)(rand()%CONST_MAX_RAND)/(CONST_MAX_RAND-1)*len_y;
-        partc_pos[loop][2] = (double)(rand()%CONST_MAX_RAND)/(CONST_MAX_RAND-1)*len_z;
+    // partc_num = 10;
+    // partc_pos = (double**)malloc(partc_num*sizeof(double*));
+    // for(loop=0; loop<partc_num; loop++){
+    //     partc_pos[loop] = (double*)malloc(3*sizeof(double));
+    //     partc_pos[loop][0] = (double)(rand()%CONST_MAX_RAND)/(CONST_MAX_RAND-1)*len_x;
+    //     partc_pos[loop][1] = (double)(rand()%CONST_MAX_RAND)/(CONST_MAX_RAND-1)*len_y;
+    //     partc_pos[loop][2] = (double)(rand()%CONST_MAX_RAND)/(CONST_MAX_RAND-1)*len_z;
         
-    }
+    // }
     
     
     
-    output_info =  func_partc_incell_stat(partc_pos, partc_num, len_cell, len_x, len_y, len_z);
+    output_info =  func_partc_incell_stat(partc_pos_res, partc_num_def, len_cell, len_x, len_y, len_z);
     
     
     //PRINT basic information
