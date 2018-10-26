@@ -175,9 +175,9 @@ int main()
     }
 
     for (int i = 0; i < N; i++) {
-        r[i][0] = result[0];
-        r[i][1] = result[1];
-        r[i][2] = result[2];
+        r[i][0] = partc_pos_res[i][0]; 
+        r[i][1] = partc_pos_res[i][1];
+        r[i][2] = partc_pos_res[i][2];
     }
 
     for(int i = 0; i < N; i++) {
@@ -186,11 +186,15 @@ int main()
             f[i][j] = 0;
         }
     }
+    ofstream outputfile;
+    outputfile.open("dump.md", ios::out);
 
     double rand_num = distribution(generator);
     //init force compute
     compute_force(r, v, f, rand_num, N, output_info);
-    int ntimestep = 10;
+    writeDump(outputfile, r, v, 0);
+
+    int ntimestep = 5000;
     double m = 1.0;
     for (int i = 0; i < ntimestep; i++) {
 
@@ -204,7 +208,7 @@ int main()
             r[j][1] += v[j][1] * dt;
             r[j][2] += v[j][2] * dt;
         }
- 
+        pbc(r); 
         //vector<vector<int>> cell_list;
         //buildNeighborList(neighborlist, r);
         //force computation
@@ -219,7 +223,12 @@ int main()
             v[j][1] += 0.5 * f[j][1] / m * dt;
             v[j][2] += 0.5 * f[j][2] / m * dt;
         }
- 
+         if(i % 100 == 0) {
+            cout << i << endl;
+            writeDump(outputfile, r, v, i);
+        }
+
+
     }
 
     //memory release
