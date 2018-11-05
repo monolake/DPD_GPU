@@ -6,6 +6,7 @@
 #include	<fstream>
 #include    "sim_run.h"
 #include    "calc_neighbor_list.h"
+#include    "random_mars.h"
 
 using namespace std;
 
@@ -55,9 +56,9 @@ int load_func(FILE* fptr, double* outptr) {
 int main()
 {
 
-    unsigned seed1 = std::chrono::system_clock::now().time_since_epoch().count();
-    std::default_random_engine generator (seed1);
-    std::normal_distribution<double> distribution (0.0,1.0);
+    //unsigned seed1 = std::chrono::system_clock::now().time_since_epoch().count();
+    //std::default_random_engine generator (seed1);
+    //std::normal_distribution<double> distribution (0.0,(double) 1/sqrt(dt));
 	FILE*		file_ptr;
 	
 	char		str_input[5];
@@ -161,7 +162,12 @@ int main()
     
     //scanf("%d",&end_flag);
     // finished building cell list
+    unsigned seed1 = std::chrono::system_clock::now().time_since_epoch().count();
+    std::default_random_engine generator (seed1);
+    std::normal_distribution<double> distribution (0.0,(double) 1/sqrt(dt));
 
+    RanMars * random = new RanMars(34387);
+     
     int N = 4000;
     double** r = new double* [N];
     double** v = new double* [N];
@@ -189,20 +195,22 @@ int main()
     ofstream outputfile;
     outputfile.open("dump.md", ios::out);
 
-    double rand_num = distribution(generator);
+    //double rand_num = distribution(generator);
     //init force compute
-    compute_force(r, v, f, rand_num, N, output_info);
+    //compute_force(r, v, f, random, N, output_info);
+    double rand_num = 0;
+    compute_force_std(r, v, f, generator, distribution, random, N);
     writeDump(outputfile, r, v, 0);
 
     int ntimestep = 5000;
     double m = 1.0;
-    for (int i = 0; i < ntimestep; i++) {
+    for (int i = 0; i <= ntimestep; i++) {
 
         //half integration
         for(int j = 0; j < N; j++) {
-            v[j][0] += 0.5 * f[j][0] / m * dt;
-            v[j][1] += 0.5 * f[j][1] / m * dt;
-            v[j][2] += 0.5 * f[j][2] / m * dt;
+            v[j][0] += 0.5 * f[j][0] * dt;
+            v[j][1] += 0.5 * f[j][1] * dt;
+            v[j][2] += 0.5 * f[j][2] * dt;
 
             r[j][0] += v[j][0] * dt;
             r[j][1] += v[j][1] * dt;
@@ -214,21 +222,21 @@ int main()
         //force computation
         //update f
         clear_force(f, N);
-        rand_num = distribution(generator);
-        compute_force(r, v, f, rand_num, N, output_info);
+        //rand_num = distribution(generator);
+        //compute_force(r, v, f, random, N, output_info);
+        compute_force_std(r, v, f, generator, distribution, random, N);
 
         //full integration
         for(int j = 0; j < N; j++) {
-            v[j][0] += 0.5 * f[j][0] / m * dt;
-            v[j][1] += 0.5 * f[j][1] / m * dt;
-            v[j][2] += 0.5 * f[j][2] / m * dt;
+            v[j][0] += 0.5 * f[j][0] * dt;
+            v[j][1] += 0.5 * f[j][1] * dt;
+            v[j][2] += 0.5 * f[j][2] * dt;
         }
          if(i % 100 == 0) {
-            cout << i << endl;
-            writeDump(outputfile, r, v, i);
+            double ke = computeKE(v);
+            cout << i << " temp is " << ke * 2 / (3 * 4000 * 1) << endl;
+            //writeDump(outputfile, r, v, i);
         }
-
-
     }
 
     //memory release
@@ -241,6 +249,7 @@ int main()
     delete(r);
     delete(v);
     delete(f);
+    delete(random);
     cout << "position is read, f is computed" << endl;
  
 }

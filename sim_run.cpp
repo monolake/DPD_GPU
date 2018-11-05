@@ -1,4 +1,5 @@
 #include "sim_run.h"
+#include "random_mars.h"
 
 void clear_force(double **f, int N) {
     for (int i = 0; i < N; i++) {
@@ -8,7 +9,7 @@ void clear_force(double **f, int N) {
     }
 }
 
-void compute_force(double** r, double** v, double** f, double rand_num, int N, OUTPUT_struct* cell_list) {
+void compute_force(double** r, double** v, double** f, RanMars * random, int N, OUTPUT_struct* cell_list) {
 
     double m = 1.0;
     int num_cx, num_cy, num_cz;
@@ -43,6 +44,18 @@ void compute_force(double** r, double** v, double** f, double rand_num, int N, O
                             delx = r[i][0] - r[part_id][0];
                             dely = r[i][1] - r[part_id][1];
                             delz = r[i][2] - r[part_id][2];
+                            if (delx < - 5)
+                                delx = delx + 10;
+                            else if (delx > 5)
+                                delx = delx - 10;
+                            if (dely < -5)
+                                dely = dely + 10;
+                            else if (dely > 5)
+                                dely = dely - 10;
+                            if (delz < -5)
+                                delz = delz + 10;
+                            else if (delz > 5)
+                                delz = delz - 10;
                             double rr;
                             rr = sqrt(delx * delx + dely * dely + delz * delz);
                             if(rr < rc) {
@@ -61,7 +74,7 @@ void compute_force(double** r, double** v, double** f, double rand_num, int N, O
                                 fpair -= force_gamma * wr * wr * dot;
 
                                 //randum - gaussian random number with zero mean and unit variance
-                                fpair += force_sigma * wr * rand_num * 1 / sqrt(dt);
+                                fpair += force_sigma * wr * random->gaussian() * 1 / sqrt(dt);
 
                                 f[i][0] += delx / rr * fpair;
                                 f[i][1] += dely / rr * fpair;
@@ -72,6 +85,61 @@ void compute_force(double** r, double** v, double** f, double rand_num, int N, O
                 }
             }
         }  
+   }
+}
+void compute_force_std(double** r, double** v, double** f, std::default_random_engine generator, std::normal_distribution<double> distribution, RanMars * random, int N) {
+    double m = 1.0;
+    for(int i = 0; i < N - 1; i++) {
+            for (int j = i+1; j < N; j++) {
+                if (i != j) {
+                    double delx, dely, delz;
+                    delx = r[i][0] - r[j][0];
+                    if (delx < - 5)
+                        delx = delx + 10;
+                    else if (delx > 5)
+                        delx = delx - 10;
+                    dely = r[i][1] - r[j][1];
+                    if (dely < -5)
+                        dely = dely + 10;
+                    else if (dely > 5)
+                        dely = dely - 10;
+                    delz = r[i][2] - r[j][2];
+                    if (delz < -5)
+                        delz = delz + 10;
+                    else if (delz > 5)
+                        delz = delz - 10;
+                    double rr;
+                    rr = sqrt(delx * delx + dely * dely + delz * delz);
+                    if(rr < rc) {
+                        double fpair;
+                        double wr;
+                        wr = 1 - rr / rc;
+                        fpair = force_a0 * wr;
+
+                        double delvx, delvy, delvz;
+                        delvx = v[i][0] - v[j][0];
+                        delvy = v[i][1] - v[j][1];
+                        delvz = v[i][2] - v[j][2];
+
+                        double dot;
+                        dot = (delx * delvx + dely * delvy + delz * delvz) / rr;
+                        fpair -= force_gamma * wr * wr * dot;
+
+                        //randum - gaussian random number with zero mean and unit variance
+                        double rand_num = distribution(generator);
+
+                        fpair += force_sigma * wr * random->gaussian() * 1 / sqrt(dt);
+
+                        f[i][0] += delx * fpair / rr;
+                        f[i][1] += dely * fpair / rr;
+                        f[i][2] += delz * fpair / rr;
+                        
+                        f[j][0] -= delx * fpair / rr;
+                        f[j][1] -= dely * fpair / rr;
+                        f[j][2] -= delz * fpair / rr;
+                    }
+                }
+            }
    }
 }
 void writeDump(ofstream& outputfile, double** r, double** v, int ntimestep) {
@@ -95,16 +163,26 @@ void pbc(double** r) {
     for (int i = 0; i < N; i++) {
         if (r[i][0] < 0)
             r[i][0] += 10;
-        else if (r[i][0] > 10)
+        if (r[i][0] > 10)
             r[i][0] -= 10;
         if (r[i][1] < 0)
             r[i][1] += 10;
-        else if (r[i][1] > 10)
+        if (r[i][1] > 10)
             r[i][1] -= 10;
         if (r[i][2] < 0)
             r[i][2] += 10;
-        else if (r[i][2] > 10)
+        if (r[i][2] > 10)
             r[i][2] -= 10;
     }
 }
+
+double computeKE(double** v) {
+    double m = 1.0;
+    double ke = 0.0;
+    for (int i = 0; i < N; i++) {
+        ke += 0.5 * m * (v[i][0] * v[i][0] + v[i][1] * v[i][1] + v[i][2] * v[i][2]);
+    }
+    return ke;
+}
+
 
