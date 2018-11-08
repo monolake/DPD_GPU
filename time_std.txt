@@ -1,0 +1,46 @@
+nohup: ignoring input
+0 Particles inside
+1 
+2 4000 atoms
+3 1 atom types
+4 0 10 xlo xhi 
+5 0 10 ylo yhi
+6 0 10 zlo zhi
+7 
+8 Masses
+9 
+10 1 1.0
+11 
+12 Atoms
+13 
+0 temp is 0.0118212
+100 temp is 1.34241
+200 temp is 1.26576
+300 temp is 1.04675
+400 temp is 1.18196
+500 temp is 1.07217
+600 temp is 1.09073
+700 temp is 1.0874
+800 temp is 1.00145
+900 temp is 1.0928
+1000 temp is 1.04739
+1100 temp is 1.00661
+1200 temp is 1.05341
+1300 temp is 1.01507
+1400 temp is 1.0434
+1500 temp is 1.01686
+1600 temp is 1.012
+1700 temp is 1.01549
+1800 temp is 0.977625
+1900 temp is 1.01515
+2000 temp is 0.999208
+2100 temp is 0.996661
+2200 temp is 1.01046
+2300 temp is 1.00048
+2400 temp is 1.0305
+2500 temp is 1.00821
+2600 temp is 1.0111
+2700 temp is 1.00402
+2800 temp is 1.00684
+2900 temp is 1.00809
+3000 temp is 1.01603

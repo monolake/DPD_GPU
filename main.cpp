@@ -8,6 +8,8 @@
 #include    "calc_neighbor_list.h"
 #include    "random_mars.h"
 
+#include <map>
+#include <vector>
 using namespace std;
 
 void next_func(FILE* fptr) {
@@ -53,12 +55,10 @@ int load_func(FILE* fptr, double* outptr) {
 	
 }
 
-int main()
+int main(int argc, char* argv[])
 {
 
-    //unsigned seed1 = std::chrono::system_clock::now().time_since_epoch().count();
-    //std::default_random_engine generator (seed1);
-    //std::normal_distribution<double> distribution (0.0,(double) 1/sqrt(dt));
+    const char* select = argv[1];
 	FILE*		file_ptr;
 	
 	char		str_input[5];
@@ -162,9 +162,6 @@ int main()
     
     //scanf("%d",&end_flag);
     // finished building cell list
-    unsigned seed1 = std::chrono::system_clock::now().time_since_epoch().count();
-    std::default_random_engine generator (seed1);
-    std::normal_distribution<double> distribution (0.0,(double) 1/sqrt(dt));
 
     RanMars * random = new RanMars(34387);
      
@@ -192,15 +189,33 @@ int main()
             f[i][j] = 0;
         }
     }
+
+        
+
     ofstream outputfile;
     outputfile.open("dump.md", ios::out);
 
-    //double rand_num = distribution(generator);
     //init force compute
-    //compute_force(r, v, f, random, N, output_info);
-    double rand_num = 0;
-    compute_force_std(r, v, f, generator, distribution, random, N);
-    writeDump(outputfile, r, v, 0);
+    map<int, vector<int>> cell_list;
+    if (!strcmp(select, "sijun"))
+        compute_force(r, v, f, random, N, output_info, len_cell, len_x, len_y, len_z);
+    else if (!strcmp(select, "vector")) {
+        int cell_nx = 10 / len_cell + 1;
+        int cell_ny = 10 / len_cell + 1;
+        int cell_nz = 10 / len_cell + 1;
+                for (int i = 0; i < N; i++) {
+            int cellx = (int) r[i][0] / len_cell;
+            int celly = (int) r[i][1] / len_cell; 
+            int cellz = (int) r[i][2] / len_cell;
+            int cellid = cellz + celly * cell_nz + cellx * cell_nz * cell_ny;
+            cell_list[cellid].push_back(i); 
+        }
+        compute_force_vector(r, v, f, random, N, cell_list, len_cell, len_x, len_y, len_z);
+    }
+    else if (!strcmp(select, "base")) 
+        compute_force_std(r, v, f, random, N);
+
+    //writeDump(outputfile, r, v, 0);
 
     int ntimestep = 5000;
     double m = 1.0;
@@ -217,14 +232,14 @@ int main()
             r[j][2] += v[j][2] * dt;
         }
         pbc(r); 
-        //vector<vector<int>> cell_list;
-        //buildNeighborList(neighborlist, r);
         //force computation
-        //update f
         clear_force(f, N);
-        //rand_num = distribution(generator);
-        //compute_force(r, v, f, random, N, output_info);
-        compute_force_std(r, v, f, generator, distribution, random, N);
+        if (!strcmp(select, "sijun"))
+            compute_force(r, v, f, random, N, output_info, len_cell, len_x, len_y, len_z);
+        else if (!strcmp(select, "vector"))
+            compute_force_vector(r, v, f, random, N, cell_list, len_cell, len_x, len_y, len_z);
+        else if (!strcmp(select, "base"))
+            compute_force_std(r, v, f, random, N);
 
         //full integration
         for(int j = 0; j < N; j++) {
@@ -232,7 +247,7 @@ int main()
             v[j][1] += 0.5 * f[j][1] * dt;
             v[j][2] += 0.5 * f[j][2] * dt;
         }
-         if(i % 100 == 0) {
+         if(i % 1 == 0) {
             double ke = computeKE(v);
             cout << i << " temp is " << ke * 2 / (3 * 4000 * 1) << endl;
             //writeDump(outputfile, r, v, i);
