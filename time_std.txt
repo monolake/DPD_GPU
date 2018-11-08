@@ -44,3 +44,8 @@ nohup: ignoring input
 2800 temp is 1.00684
 2900 temp is 1.00809
 3000 temp is 1.01603
+3100 temp is 1.00323
+3200 temp is 1.0043
+3300 temp is 1.01552
+3400 temp is 1.01619
+3500 temp is 1.01064
