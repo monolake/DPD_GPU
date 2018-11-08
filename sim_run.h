@@ -2,7 +2,7 @@
 #define SIM_RUN
 
 const int timestep=100;
-const double dt=0.005;
+const double dt=0.001;
 const int force_a0=18.75;
 const double force_gamma=4.5;
 const double force_sigma=3.0;
@@ -19,6 +19,7 @@ const int N = 4000;
 using namespace std;
 
 void clear_force(double** f, int N);
+void cell_force(double** r, double** v, double** f, RanMars* random, int N, OUTPUT_struct* cell_list, int cell_id, int i);
 void compute_force(double** r, double** v, double** f, RanMars * random, int N, OUTPUT_struct* cell_list, double len_cell,
 double box_lenx, double box_leny, double box_lenz );
 void compute_force_vector(double** r, double** v, double** f, RanMars * random, int N, map<int, vector<int>> cell_list, double len_cell,

@@ -53,9 +53,9 @@ OUTPUT_struct* func_partc_incell_stat(double** partc_pos, int partc_num, double 
 	
 	// 1. initialization
 	/* get #cells in x, y, z dimensions: num_cx, num_cy, num_cz */
-	num_cx = (int) ceil(len_x/len_cell);
-	num_cy = (int) ceil(len_y/len_cell);
-	num_cz = (int) ceil(len_z/len_cell);
+	num_cx = (int) ceil(len_x/len_cell);// + 1;
+	num_cy = (int) ceil(len_y/len_cell);// + 1;
+	num_cz = (int) ceil(len_z/len_cell);// + 1;
 
 	// 2. loop over all N particles to get the list of cell that each particle belongs to
 	partc_cell_id = (int*)malloc(partc_num*sizeof(int));
