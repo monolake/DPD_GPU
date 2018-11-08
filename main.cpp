@@ -217,7 +217,7 @@ int main(int argc, char* argv[])
 
     //writeDump(outputfile, r, v, 0);
 
-    int ntimestep = 5000;
+    int ntimestep = 50000;
     double m = 1.0;
     for (int i = 0; i <= ntimestep; i++) {
 
@@ -247,7 +247,7 @@ int main(int argc, char* argv[])
             v[j][1] += 0.5 * f[j][1] * dt;
             v[j][2] += 0.5 * f[j][2] * dt;
         }
-         if(i % 1 == 0) {
+         if(i % 100 == 0) {
             double ke = computeKE(v);
             cout << i << " temp is " << ke * 2 / (3 * 4000 * 1) << endl;
             //writeDump(outputfile, r, v, i);
