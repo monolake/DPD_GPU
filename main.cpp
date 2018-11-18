@@ -7,7 +7,6 @@
 #include    "sim_run.h"
 #include    "calc_neighbor_list.h"
 #include    "random_mars.h"
-
 #include <map>
 #include <vector>
 using namespace std;
@@ -21,11 +20,8 @@ void next_func(FILE* fptr) {
 	//}
 	
 	for (int loop=0; loop<14; loop++){
-		
 		fgets(str_buff, 256, fptr);
-		
 		printf("%d %s", loop, str_buff);
-		
 	}
 	
 }
@@ -148,21 +144,6 @@ int main(int argc, char* argv[])
     
     output_info =  func_partc_incell_stat(partc_pos_res, partc_num_def, len_cell, len_x, len_y, len_z);
     
-    
-    //PRINT basic information
-    //if (1){
-        
-        
-    //}
-    
-    //PRINT output information
-    //if (1){
-    //    func_print_output_info(output_info);
-    //}
-    
-    //scanf("%d",&end_flag);
-    // finished building cell list
-
     RanMars * random = new RanMars(34387);
      
     int N = 4000;
@@ -200,13 +181,13 @@ int main(int argc, char* argv[])
     if (!strcmp(select, "sijun"))
         compute_force(r, v, f, random, N, output_info, len_cell, len_x, len_y, len_z);
     else if (!strcmp(select, "vector")) {
-        int cell_nx = 10 / len_cell + 1;
-        int cell_ny = 10 / len_cell + 1;
-        int cell_nz = 10 / len_cell + 1;
+        int cell_nx = (int) floor(10 / len_cell);
+        int cell_ny = (int) floor(10 / len_cell);
+        int cell_nz = (int) floor(10 / len_cell);
                 for (int i = 0; i < N; i++) {
-            int cellx = (int) r[i][0] / len_cell;
-            int celly = (int) r[i][1] / len_cell; 
-            int cellz = (int) r[i][2] / len_cell;
+            int cellx = (int) floor(r[i][0] / len_cell);
+            int celly = (int) floor(r[i][1] / len_cell); 
+            int cellz = (int) floor(r[i][2] / len_cell);
             int cellid = cellz + celly * cell_nz + cellx * cell_nz * cell_ny;
             cell_list[cellid].push_back(i); 
         }
@@ -217,7 +198,7 @@ int main(int argc, char* argv[])
 
     //writeDump(outputfile, r, v, 0);
 
-    int ntimestep = 50000;
+    int ntimestep = 5000;
     double m = 1.0;
     for (int i = 0; i <= ntimestep; i++) {
 
@@ -234,10 +215,24 @@ int main(int argc, char* argv[])
         pbc(r); 
         //force computation
         clear_force(f, N);
-        if (!strcmp(select, "sijun"))
+        if (!strcmp(select, "sijun")) {
             compute_force(r, v, f, random, N, output_info, len_cell, len_x, len_y, len_z);
-        else if (!strcmp(select, "vector"))
+            output_info =  func_partc_incell_stat(r, partc_num_def, len_cell, len_x, len_y, len_z);
+        }
+        else if (!strcmp(select, "vector")) {
             compute_force_vector(r, v, f, random, N, cell_list, len_cell, len_x, len_y, len_z);
+            cell_list.clear();
+            int cell_nx = (int) floor(10 / len_cell);
+            int cell_ny = (int) floor(10 / len_cell);
+            int cell_nz = (int) floor(10 / len_cell);
+            for (int i = 0; i < N; i++) {
+                int cellx = (int) floor(r[i][0] / len_cell);
+                int celly = (int) floor(r[i][1] / len_cell); 
+                int cellz = (int) floor(r[i][2] / len_cell);
+                int cellid = cellz + celly * cell_nz + cellx * cell_nz * cell_ny;
+                cell_list[cellid].push_back(i); 
+            }
+        }
         else if (!strcmp(select, "base"))
             compute_force_std(r, v, f, random, N);
 
