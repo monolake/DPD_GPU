@@ -123,12 +123,21 @@ __global__ void f_clear(double *f) {
  }  
 }
 
-__global__ void iteration(curandState *state, double* r, double* f, double* v, int* cell_list, int* cell_list_count, int avg_num_cell) {
+__global__ void setup_kernel(curandState *state) {
+    int id = threadIdx.x + blockDim.x * blockIdx.x;
+    if (id < N)
+        curand_init(34387, id, 0, &state[id]);
+}
+
+__global__ void iteration(curandState *state, double* r, double* f, double* v, int* cell_list, int* cell_list_count, int avg_num_cell, int * dev_ts) {
     //printf("Hello from block %d, thread %d\n", blockIdx.x, threadIdx.x);
     int id = threadIdx.x + blockDim.x * blockIdx.x;
         //printf("blockIdx.x %d threadIdx.x %d\n", blockIdx.x, threadIdx.x); 
     if (id < N) {
-                        int i;
+            curandState localState = state[id];
+            //curand_init(34387+id, id, 0, &state[id]);
+
+            int i;
             if (id == 0) {
                 double sum_f = 0;
                 for (int j = 0; j < 3 * N; j++) {
@@ -154,8 +163,7 @@ __global__ void iteration(curandState *state, double* r, double* f, double* v, i
             int idx = (int) floor(x / len_cell);
             int idy = (int) floor(y / len_cell);
             int idz = (int) floor(z / len_cell);
-            curand_init(34387, 0, 0, &state[id]);
-            // loop through 27 boxes
+                        // loop through 27 boxes
             for (int n = -1; n < 2; n++) {
                 for (int m = -1; m < 2; m++) {
                     for (int l = -1; l < 2; l++) {
@@ -210,7 +218,9 @@ __global__ void iteration(curandState *state, double* r, double* f, double* v, i
                                     double dot;
                                     dot = (delx * delvx + dely * delvy + delz * delvz) / rr;
                                     fpair -= force_gamma * wr * wr * dot;
-                                    fpair += force_sigma * wr * curand_normal_double(&state[id]) * 1 / sqrt(dt);
+                                    //fpair += force_sigma * wr * curand_normal_double(&state[id]) * 1 / sqrt(dt);
+                                    fpair += force_sigma * wr * curand_normal_double(&localState) * 1 / sqrt(dt);
+
                                     f[id*3] += delx * fpair / rr;
                                     f[id*3+1] += dely * fpair / rr;
                                     f[id*3+2] += delz * fpair / rr; 
@@ -229,6 +239,8 @@ __global__ void iteration(curandState *state, double* r, double* f, double* v, i
                    }
                 }
             }
+state[id] = localState;
+
    }
 }
 
@@ -330,20 +342,27 @@ void gpu_dpd(double** r, double**f, double** v, const char* select, RanMars* ran
         cudaMalloc((void**) &d_state, N);
         int ntimestep = 5000;
         double m = 1.0;
-        int blockSize = (int) floor(N/1 + 1);
+        int blockSize = (int) floor(N/1024 + 1);
         printf("go to call iteration\n");
         cout << "verify f " << verify_f(f) << endl;
         ofstream outputfile;
         outputfile.open("dump_gpu.md", ios::out);
-
+        setup_kernel<<<blockSize,1024>>>(d_state);
+        cudaDeviceSynchronize();
         for (i = 0; i <= 5000; i++) {
-            init<<<blockSize, 1>>>(dev_r, dev_v, dev_f);
+            init<<<blockSize, 1024>>>(dev_r, dev_v, dev_f);
             cudaDeviceSynchronize();
-            f_clear<<<blockSize, 1>>>(dev_f);
+            f_clear<<<blockSize, 1024>>>(dev_f);
             cudaDeviceSynchronize();
-            iteration<<<blockSize, 1>>>(d_state, dev_r, dev_f, dev_v, dev_cell_list, dev_cell_list_count, max_num_part);
+            int *dev_ts;
+            cudaMalloc((void**) &dev_ts, sizeof(int));
+            cudaMemcpy(dev_ts, &i, sizeof(int), cudaMemcpyHostToDevice);
+ 
+            //setup_kernel<<<blockSize,1024>>>(d_state);
+            //cudaDeviceSynchronize();
+            iteration<<<blockSize, 1024>>>(d_state, dev_r, dev_f, dev_v, dev_cell_list, dev_cell_list_count, max_num_part, dev_ts);
             cudaDeviceSynchronize();
-            post_int<<<blockSize, 1>>>(dev_v, dev_f);
+            post_int<<<blockSize, 1024>>>(dev_v, dev_f);
             cudaMemcpy(cpu_r, dev_r, size, cudaMemcpyDeviceToHost);
             cudaMemcpy(cpu_v, dev_v, size, cudaMemcpyDeviceToHost);
             cudaMemcpy(cpu_f, dev_f, size, cudaMemcpyDeviceToHost);           
@@ -395,6 +414,7 @@ void gpu_dpd(double** r, double**f, double** v, const char* select, RanMars* ran
                 //cout << "verify force on gpu at step " << i << " is " << verify_f(f) << endl;
 
             }
+
         }
         printf("iteration done\n");
         free(cpu_r);
